@@ -1,0 +1,24 @@
+[project]
+name = "utilscord"
+version = "0.1.0"
+description = "A simple Discord. utility bot."
+requires-python = ">=3.14.7"
+dependencies = [
+    "py-cord>=2.6,<3",
+    "python-dotenv>=1,<2",
+]
+
+[project.scripts]
+utilscord = "main:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["main"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["cogs*"]
