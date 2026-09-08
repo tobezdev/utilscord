@@ -2,7 +2,7 @@ from io import BytesIO
 
 import aiohttp
 
-from discord import Bot, ApplicationContext, InputTextStyle, SelectOption, CheckboxGroupOption, Interaction, File, MediaGalleryItem
+from discord import IntegrationType, InteractionContextType, Bot, ApplicationContext, InputTextStyle, SelectOption, CheckboxGroupOption, Interaction, File, MediaGalleryItem
 from discord.ext.commands import Cog, cooldown, BucketType
 from discord.commands import SlashCommandGroup
 from discord.ui import DesignerModal, Label, InputText, CheckboxGroup, Select, DesignerView, Container, MediaGallery, ActionRow, Button, TextDisplay
@@ -139,7 +139,15 @@ class LaTeX(Cog):
 	def __init__(self, bot: Bot) -> None:
 		self.bot = bot
 
-	latex = SlashCommandGroup("latex", "LaTeX commands")
+	latex = SlashCommandGroup(
+		"latex", "LaTeX commands",
+		integration_types={IntegrationType.guild_install, IntegrationType.user_install},
+		contexts={
+			InteractionContextType.guild,
+			InteractionContextType.bot_dm,
+			InteractionContextType.private_channel,
+		},
+	)
 
 	@latex.command(name="render", description="Render LaTeX code into an image.")
 	@cooldown(1, 900, BucketType.user)

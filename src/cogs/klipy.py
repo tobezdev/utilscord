@@ -2,7 +2,7 @@ import os
 from urllib.parse import urlsplit
 
 import aiohttp
-from discord import AllowedMentions, ApplicationContext, Bot, Interaction, MediaGalleryItem, SelectOption
+from discord import IntegrationType, InteractionContextType, AllowedMentions, ApplicationContext, Bot, Interaction, MediaGalleryItem, SelectOption
 from discord.commands import slash_command
 from discord.ext.commands import BucketType, Cog, cooldown
 from discord.ui import Container, DesignerModal, DesignerView, InputText, Label, MediaGallery, Select, TextDisplay
@@ -119,7 +119,15 @@ class Klipy(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @slash_command(name="klipy", description="Search KLIPY for a GIF.")
+    @slash_command(
+        name="klipy", description="Search KLIPY for a GIF.",
+        integration_types={IntegrationType.guild_install, IntegrationType.user_install},
+        contexts={
+            InteractionContextType.guild,
+            InteractionContextType.bot_dm,
+            InteractionContextType.private_channel,
+        },
+    )
     @cooldown(1, 10, BucketType.user)
     async def klipy(self, ctx: ApplicationContext):
         await ctx.response.send_modal(KlipySearchModal())

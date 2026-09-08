@@ -13,8 +13,7 @@ def main() -> None:
         owner_id=969254887621820526,
         auto_sync_commands=True,
         default_command_contexts={
-            InteractionContextType.guild,
-            InteractionContextType.private_channel
+            InteractionContextType.guild
         },
         default_command_integration_types={
             IntegrationType.guild_install
