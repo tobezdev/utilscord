@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: utilscord
+Version: 0.1.0
+Summary: A simple Discord. utility bot.
+Requires-Python: >=3.14.7
+Requires-Dist: py-cord<3,>=2.6
+Requires-Dist: python-dotenv<2,>=1
