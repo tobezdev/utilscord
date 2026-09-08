@@ -10,6 +10,7 @@ dependencies = [
 
 [project.scripts]
 utilscord = "main:main"
+build-utilscord = "build_utilscord:main"
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -17,7 +18,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-py-modules = ["main"]
+py-modules = ["main", "build_utilscord"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
