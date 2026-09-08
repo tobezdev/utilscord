@@ -2,7 +2,7 @@
 
 # Utilscord
 
-[Invite Utilscord](https://discord.com/oauth2/authorize?client_id=1546268629648150528) · [Commands](#commands) · [Permissions](#permissions) · [Support](#support) · [Privacy](#privacy) · [Terms](#terms)
+[Invite Utilscord](https://discord.com/oauth2/authorize?client_id=1546268629648150528) · [Website](https://tobezdev.com/utilscord)
 
 </div>
 
