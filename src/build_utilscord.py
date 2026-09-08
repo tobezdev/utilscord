@@ -1,5 +1,3 @@
-"""Assemble the bot's source and locked dependencies for the production host."""
-
 from pathlib import Path
 import shutil
 import subprocess
@@ -38,14 +36,10 @@ def main() -> None:
             destination = staging / "src" / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, destination)
-        shutil.copy2(root / "DEPLOYMENT.md", staging / "DEPLOYMENT.md")
         if output.exists():
             shutil.rmtree(output)
         shutil.copytree(staging, output)
-
     print(f"Built {output}")
-    print("Upload its contents to /home/container; set REQUIREMENTS_FILE=requirements.txt")
-    print("and the main entrypoint to src/main.py. See DEPLOYMENT.md for configuration.")
 
 
 if __name__ == "__main__":
