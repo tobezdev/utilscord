@@ -6,10 +6,8 @@ from discord import Bot, Intents, InteractionContextType, IntegrationType
 
 
 def main() -> None:
-    i = Intents.default()
-    i.message_content = True
     bot = Bot(
-        intents=i,
+        intents=Intents.default(),
         owner_id=969254887621820526,
         auto_sync_commands=True,
         default_command_contexts={
