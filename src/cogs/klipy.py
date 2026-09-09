@@ -2,7 +2,8 @@ import os
 from urllib.parse import urlsplit
 
 import aiohttp
-from discord import IntegrationType, InteractionContextType, AllowedMentions, ApplicationContext, Bot, Interaction, MediaGalleryItem, SelectOption
+from discord import IntegrationType, InteractionContextType, AllowedMentions, ApplicationContext, Bot, Interaction, MediaGalleryItem, SelectOption, Thread
+from discord.abc import GuildChannel
 from discord.commands import slash_command
 from discord.ext.commands import Cog
 
@@ -13,6 +14,16 @@ from discord.utils import escape_markdown
 
 FILTERS = ("high", "medium", "low", "off")
 SEARCH_URL = "https://api.klipy.com/v2/search"
+SPOILER_CHANNEL_FLAG = 1 << 21
+
+
+def allows_mature_gifs(channel: object) -> bool:
+    if isinstance(channel, Thread):
+        channel = channel.parent
+    if not isinstance(channel, GuildChannel) or getattr(channel, "nsfw", False) is not True:
+        return False
+    flags = getattr(getattr(channel, "flags", None), "value", None)
+    return isinstance(flags, int) and not flags & SPOILER_CHANNEL_FLAG
 
 
 def https_url(value: object) -> str | None:
@@ -49,20 +60,24 @@ def result_view(result: dict) -> DesignerView:
 
 
 class KlipySearchModal(DesignerModal):
-    def __init__(self):
+    def __init__(self, channel: object = None):
         super().__init__(title="Search KLIPY", timeout=300)
         self.query = InputText(placeholder="Search KLIPY", min_length=1, max_length=200)
         self.maturity = Select(
             options=[
-                SelectOption(label=value.title(), value=value, default=value == "low")
-                for value in FILTERS
+                SelectOption(label=value.title(), value=value, default=value == "high")
+                for value in (FILTERS if allows_mature_gifs(channel) else ("high",))
             ],
             min_values=1,
             max_values=1,
             required=True,
         )
         self.add_item(Label("GIF search", self.query))
-        self.add_item(Label("Maturity filter (high = strongest)", self.maturity))
+        self.add_item(Label(
+            "Maturity filter (high = strongest)" if allows_mature_gifs(channel)
+            else "Maturity filter (High required)",
+            self.maturity,
+        ))
 
     async def callback(self, interaction: Interaction):
         query = (self.query.value or "").strip()
@@ -73,6 +88,8 @@ class KlipySearchModal(DesignerModal):
         if maturity not in FILTERS:
             await interaction.response.send_message("Choose high, medium, low, or off.", ephemeral=True)
             return
+        if not allows_mature_gifs(interaction.channel):
+            maturity = "high"
         api_key = os.getenv("KLIPY_API_KEY", "").strip()
         if not api_key:
             await interaction.response.send_message("KLIPY search isn't configured yet.", ephemeral=True)
@@ -114,6 +131,12 @@ class KlipySearchModal(DesignerModal):
         if view is None:
             await interaction.followup.send("Couldn't load GIFs from KLIPY. Please try again later.", ephemeral=True)
             return
+        if maturity != "high" and not allows_mature_gifs(interaction.channel):
+            await interaction.followup.send(
+                "This channel is no longer marked NSFW. Search again with High filtering.",
+                ephemeral=True,
+            )
+            return
         await interaction.followup.send(view=view, allowed_mentions=AllowedMentions.none())
 
 
@@ -132,7 +155,7 @@ class Klipy(Cog):
     )
     @premium_cooldown(normal=10, premium=0)
     async def klipy(self, ctx: ApplicationContext):
-        await ctx.response.send_modal(KlipySearchModal())
+        await ctx.response.send_modal(KlipySearchModal(ctx.channel))
 
 
 def setup(bot: Bot):
