@@ -3,7 +3,9 @@ from io import BytesIO
 import aiohttp
 
 from discord import IntegrationType, InteractionContextType, Bot, ApplicationContext, InputTextStyle, SelectOption, CheckboxGroupOption, Interaction, File, MediaGalleryItem
-from discord.ext.commands import Cog, cooldown, BucketType
+from discord.ext.commands import Cog
+
+from cogs.premium_handler import premium_cooldown
 from discord.commands import SlashCommandGroup
 from discord.ui import DesignerModal, Label, InputText, CheckboxGroup, Select, DesignerView, Container, MediaGallery, ActionRow, Button, TextDisplay
 from discord.components import MediaGallery as MediaGalleryComponent
@@ -150,8 +152,7 @@ class LaTeX(Cog):
 	)
 
 	@latex.command(name="render", description="Render LaTeX code into an image.")
-	@cooldown(1, 900, BucketType.user)
-	@cooldown(1, 5, BucketType.default)
+	@premium_cooldown(normal=900, premium=180)
 	async def render_latex(self, ctx: ApplicationContext):
 		return await ctx.response.send_modal(RenderLatexModal())
 
