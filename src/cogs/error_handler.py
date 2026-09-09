@@ -2,6 +2,8 @@ import math
 import random
 import string
 
+from cogs.premium_handler import PremiumRequired
+
 from discord import (
     ApplicationCommandInvokeError,
     ApplicationContext,
@@ -50,6 +52,8 @@ def build_exception_message_view(error: Exception) -> DesignerView:
             msg = "This command has reached its limit of simultaneous uses. Please try again soon."
         case NotOwner():
             msg = "Only the bot owner can use this command."
+        case PremiumRequired():
+            msg = "This command requires a Premium Subscription."
         case CheckFailure() | ApplicationCheckFailure():
             msg = "You don't meet the requirements to use this command."
         case Forbidden():

@@ -4,7 +4,9 @@ from urllib.parse import urlsplit
 import aiohttp
 from discord import IntegrationType, InteractionContextType, AllowedMentions, ApplicationContext, Bot, Interaction, MediaGalleryItem, SelectOption
 from discord.commands import slash_command
-from discord.ext.commands import BucketType, Cog, cooldown
+from discord.ext.commands import Cog
+
+from cogs.premium_handler import premium_cooldown
 from discord.ui import Container, DesignerModal, DesignerView, InputText, Label, MediaGallery, Select, TextDisplay
 from discord.utils import escape_markdown
 
@@ -128,7 +130,7 @@ class Klipy(Cog):
             InteractionContextType.private_channel,
         },
     )
-    @cooldown(1, 10, BucketType.user)
+    @premium_cooldown(normal=10, premium=0)
     async def klipy(self, ctx: ApplicationContext):
         await ctx.response.send_modal(KlipySearchModal())
 
