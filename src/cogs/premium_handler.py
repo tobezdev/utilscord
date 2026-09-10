@@ -18,6 +18,11 @@ ROLE_REMOVAL_GRACE_SECONDS = 300
 log = logging.getLogger(__name__)
 
 
+def log_subscription_event(event: str, sku_id: int) -> None:
+    timestamp = utcnow().isoformat().replace("+00:00", "Z")
+    log.info("Premium subscription %s sku_id=%s timestamp=%s", event, sku_id, timestamp)
+
+
 class PremiumRequired(CheckFailure):
     pass
 
@@ -127,8 +132,7 @@ class PremiumHandler(Cog):
                 await member.remove_roles(role, reason="Expired personal Utilscord Premium subscription")
                 self._pending_role_removals.pop(member.id, None)
         except HTTPException:
-            log.exception(
-                "Could not sync Premium role for member %s", member.id)
+            log.exception("Could not sync Premium role")
 
     @tasks.loop(minutes=1)
     async def reconcile_roles(self):
@@ -165,7 +169,7 @@ class PremiumHandler(Cog):
         except NotFound:
             return
         except (HTTPException, OSError):
-            log.exception("Could not refresh Premium role for user %s", user_id)
+            log.exception("Could not refresh Premium role")
 
     @Cog.listener()
     async def on_member_join(self, member: Member):
@@ -178,14 +182,20 @@ class PremiumHandler(Cog):
 
     @Cog.listener()
     async def on_entitlement_create(self, entitlement: Entitlement):
+        if entitlement.sku_id in PREMIUM_SKU_IDS:
+            log_subscription_event("created", entitlement.sku_id)
         await self._entitlement_changed(entitlement)
 
     @Cog.listener()
     async def on_entitlement_update(self, entitlement: Entitlement):
+        if entitlement.sku_id in PREMIUM_SKU_IDS:
+            log_subscription_event("renewed", entitlement.sku_id)
         await self._entitlement_changed(entitlement)
 
     @Cog.listener()
     async def on_entitlement_delete(self, entitlement: Entitlement):
+        if entitlement.sku_id in PREMIUM_SKU_IDS:
+            log_subscription_event("deleted", entitlement.sku_id)
         await self._entitlement_changed(entitlement)
 
     @slash_command(name="premium", description="Check your Premium subscription status")

@@ -1,6 +1,7 @@
 import math
 import random
 import string
+import logging
 
 from cogs.premium_handler import PremiumRequired
 
@@ -29,9 +30,10 @@ from discord.ext.commands import (
 from discord.ui import ActionRow, Button, Container, DesignerView, TextDisplay
 
 
-def build_exception_message_view(error: Exception) -> DesignerView:
-    errcode = "".join(random.choices(string.ascii_letters + string.digits, k=12))
+log = logging.getLogger(__name__)
 
+
+def build_exception_message_view(error: Exception, errcode: str) -> DesignerView:
     while isinstance(error, ApplicationCommandInvokeError):
         error = error.original
 
@@ -82,7 +84,22 @@ class ErrorHandler(Cog):
         interaction: ApplicationContext,
         exception: Exception,
     ):
-        return await interaction.respond(view=build_exception_message_view(exception))
+        errcode = "".join(random.choices(string.ascii_letters + string.digits, k=12))
+        discord_interaction = getattr(interaction, "interaction", None)
+        message = getattr(discord_interaction, "message", None)
+        log.error(
+            "Automated error report error_code=%s user_id=%s guild_id=%s "
+            "channel_id=%s message_id=%s",
+            errcode,
+            getattr(interaction.author, "id", None),
+            getattr(interaction.guild, "id", None),
+            getattr(interaction.channel, "id", None),
+            getattr(message, "id", None),
+            exc_info=(type(exception), exception, exception.__traceback__),
+        )
+        return await interaction.respond(
+            view=build_exception_message_view(exception, errcode)
+        )
 
 
 def setup(bot: Bot) -> None:
