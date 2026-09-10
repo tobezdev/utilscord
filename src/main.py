@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -25,10 +26,16 @@ def main() -> None:
         if not path.name.startswith("_"):
             bot.load_extension(f"cogs.{path.stem}")
 
-    load_dotenv()
-    token = os.getenv("TOKEN")
-    if token:
-        bot.run(token)
+    project_root = Path(__file__).resolve().parent.parent
+    env_file = project_root / ".env"
+    load_dotenv(env_file, override=True)
+
+    while not (token := os.getenv("TOKEN")):
+        print(f"TOKEN is not set in {env_file}; waiting for it to be added...", flush=True)
+        time.sleep(10)
+        load_dotenv(env_file, override=True)
+
+    bot.run(token)
 
 
 if __name__ == "__main__":
