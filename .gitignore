@@ -5,3 +5,4 @@ utilscord.egg-info/
 __pycache__/
 *.py[cod]
 .env
+*.log
