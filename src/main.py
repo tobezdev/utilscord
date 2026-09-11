@@ -1,17 +1,12 @@
 import os
 import time
-import logging
 from pathlib import Path
 from dotenv import load_dotenv
 
 from discord import Bot, Intents, InteractionContextType, IntegrationType
 
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s: %(message)s"[:115],
-)
-logger = logging.getLogger(__name__)
+from logger import configure_logging
+logger = configure_logging()
 
 
 def main() -> None:
